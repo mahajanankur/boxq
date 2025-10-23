@@ -1,5 +1,5 @@
 /**
- * @fileoverview Batch Publisher for Enterprise SQS
+ * @fileoverview Batch Publisher for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

@@ -1,4 +1,4 @@
-# Enterprise SQS Documentation
+# BoxQ Documentation
 
 Welcome to the most comprehensive and production-ready SQS library for Node.js! 🚀
 
@@ -15,9 +15,9 @@ Welcome to the most comprehensive and production-ready SQS library for Node.js! 
 - [Contributing](contributing.md) - How to contribute to the project
 - [Changelog](changelog.md) - Version history and updates
 
-## 🌟 Why Enterprise SQS?
+## 🌟 Why BoxQ?
 
-Enterprise SQS is the **most advanced SQS library** available, designed specifically for production environments that demand:
+BoxQ is the **most advanced SQS library** available, designed specifically for production environments that demand:
 
 - **🛡️ Enterprise-Grade Reliability** - Circuit breaker pattern, advanced retry logic
 - **⚡ Superior Performance** - Intelligent parallel processing, batch operations
@@ -37,13 +37,13 @@ Enterprise SQS is the **most advanced SQS library** available, designed specific
 ## 🚀 Quick Start
 
 ```bash
-npm install enterprise-sqs
+npm install boxq
 ```
 
 ```javascript
-const { EnterpriseSQS } = require('enterprise-sqs');
+const { BoxQ } = require('boxq');
 
-const sqs = new EnterpriseSQS({
+const sqs = new BoxQ({
   region: 'us-east-1',
   credentials: { accessKeyId: '...', secretAccessKey: '...' }
 });
@@ -86,7 +86,7 @@ consumer.start(async (message) => {
 
 ## 🌟 Success Stories
 
-> "Enterprise SQS reduced our message processing errors by 99.9% and improved throughput by 300%. It's now our standard for all SQS operations."
+> "BoxQ reduced our message processing errors by 99.9% and improved throughput by 300%. It's now our standard for all SQS operations."
 > 
 > — **Senior Architect, Fortune 500 Company**
 
@@ -100,11 +100,11 @@ consumer.start(async (message) => {
 
 ## 🔗 Community & Support
 
-- **💬 Discord Community** - [Join our Discord](https://discord.gg/enterprise-sqs)
-- **🐛 Issue Tracker** - [GitHub Issues](https://github.com/your-org/enterprise-sqs/issues)
-- **📖 Documentation** - [Full Documentation](https://docs.enterprise-sqs.com)
-- **🎥 Video Tutorials** - [YouTube Channel](https://youtube.com/enterprise-sqs)
-- **📧 Email Support** - support@enterprise-sqs.com
+- **💬 Discord Community** - [Join our Discord](https://discord.gg/boxq)
+- **🐛 Issue Tracker** - [GitHub Issues](https://github.com/mahajanankur/boxq/issues)
+- **📖 Documentation** - [Full Documentation](https://docs.boxq.com)
+- **🎥 Video Tutorials** - [YouTube Channel](https://youtube.com/boxq)
+- **📧 Email Support** - support@boxq.com
 
 ## 📈 Roadmap
 

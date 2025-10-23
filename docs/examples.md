@@ -1,6 +1,6 @@
 # Examples & Tutorials
 
-Real-world examples and tutorials for Enterprise SQS. 🎯
+Real-world examples and tutorials for BoxQ. 🎯
 
 ## 📚 Table of Contents
 
@@ -22,10 +22,10 @@ Complete order processing system with inventory management and payment processin
 ### 1. Order Creation Flow
 
 ```javascript
-const { EnterpriseSQS } = require('enterprise-sqs');
+const { BoxQ } = require('boxq');
 
 // Initialize SQS
-const sqs = new EnterpriseSQS({
+const sqs = new BoxQ({
   region: 'us-east-1',
   credentials: { accessKeyId: '...', secretAccessKey: '...' }
 });
@@ -162,7 +162,7 @@ inventoryConsumer.start(async (message, context) => {
 
 ## Event-Driven Microservices
 
-Microservices communication using Enterprise SQS for event-driven architecture.
+Microservices communication using BoxQ for event-driven architecture.
 
 ### 1. User Service Events
 
@@ -1027,7 +1027,7 @@ collaborationConsumer.start(async (message, context) => {
 
 ## 🎯 Summary
 
-These examples demonstrate Enterprise SQS's versatility across different industries and use cases:
+These examples demonstrate BoxQ's versatility across different industries and use cases:
 
 - **E-commerce** - Order processing with inventory management
 - **Microservices** - Event-driven architecture communication

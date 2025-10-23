@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for MessagePublisher
- * @author Enterprise SQS Team
+ * @author Ankur Mahajan
  * @version 1.0.0
  */
 
@@ -102,6 +102,12 @@ describe('MessagePublisher', () => {
 
   describe('publishBatch', () => {
     it('should publish multiple messages', async () => {
+      // Create a new publisher without deduplication for this test
+      const testPublisher = new MessagePublisher(mockSQSClient, 'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue.fifo', {
+        messageGroupId: 'test-group',
+        enableDeduplication: false
+      });
+      
       const messages = [
         { body: { type: 'test1' }, options: {} },
         { body: { type: 'test2' }, options: {} }
@@ -111,7 +117,7 @@ describe('MessagePublisher', () => {
         .mockResolvedValueOnce({ MessageId: 'msg-1', MD5OfBody: 'hash-1' })
         .mockResolvedValueOnce({ MessageId: 'msg-2', MD5OfBody: 'hash-2' });
       
-      const results = await publisher.publishBatch(messages);
+      const results = await testPublisher.publishBatch(messages);
       
       expect(results).toHaveLength(2);
       expect(results[0].success).toBe(true);

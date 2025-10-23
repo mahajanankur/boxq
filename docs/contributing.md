@@ -1,6 +1,6 @@
-# Contributing to Enterprise SQS
+# Contributing to BoxQ
 
-Thank you for your interest in contributing to Enterprise SQS! 🚀
+Thank you for your interest in contributing to BoxQ! 🚀
 
 ## 📋 Table of Contents
 
@@ -59,8 +59,8 @@ We are committed to providing a welcoming and inspiring community for all. We pl
 1. **Fork the repository**
    ```bash
    # Fork on GitHub, then clone your fork
-   git clone https://github.com/your-username/enterprise-sqs.git
-   cd enterprise-sqs
+   git clone https://github.com/mahajanankur/boxq.git
+   cd boxq
    ```
 
 2. **Install dependencies**
@@ -280,7 +280,7 @@ A clear and concise description of what actually happened.
 - Node.js version: [e.g. 16.14.0]
 - npm version: [e.g. 8.3.1]
 - OS: [e.g. macOS 12.0, Windows 10, Ubuntu 20.04]
-- Enterprise SQS version: [e.g. 1.0.0]
+- BoxQ version: [e.g. 1.0.0]
 
 ## Additional Context
 Add any other context about the problem here.
@@ -288,7 +288,7 @@ Add any other context about the problem here.
 ## Code Example
 ```javascript
 // Minimal code example that reproduces the issue
-const { EnterpriseSQS } = require('enterprise-sqs');
+const { BoxQ } = require('boxq');
 // ... your code here
 ```
 ```
@@ -496,7 +496,7 @@ Contributors are recognized in:
 If you discover a security issue, please:
 
 1. **Do not** create a public issue
-2. **Email** security@enterprise-sqs.com
+2. **Email** security@boxq.com
 3. **Include** detailed information about the issue
 4. **Wait** for response before public disclosure
 
@@ -512,17 +512,17 @@ If you discover a security issue, please:
 
 ## License
 
-By contributing to Enterprise SQS, you agree that your contributions will be licensed under the MIT License.
+By contributing to BoxQ, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
 ## Thank You
 
-Thank you for contributing to Enterprise SQS! Your contributions help make this project better for everyone.
+Thank you for contributing to BoxQ! Your contributions help make this project better for everyone.
 
 ### Contributors
 
-- [@your-username](https://github.com/your-username) - Core maintainer
+- [@mahajanankur](https://github.com/mahajanankur) - Core maintainer
 - [@contributor1](https://github.com/contributor1) - Documentation
 - [@contributor2](https://github.com/contributor2) - Testing
 - [@contributor3](https://github.com/contributor3) - Performance
@@ -536,4 +536,4 @@ Thank you for contributing to Enterprise SQS! Your contributions help make this 
 
 ---
 
-**Ready to contribute?** Start by checking out our [Getting Started Guide](getting-started.md) or browse our [open issues](https://github.com/your-org/enterprise-sqs/issues)!
+**Ready to contribute?** Start by checking out our [Getting Started Guide](getting-started.md) or browse our [open issues](https://github.com/mahajanankur/boxq/issues)!

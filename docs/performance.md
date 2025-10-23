@@ -1,6 +1,6 @@
 # Performance Guide
 
-Optimization and scaling strategies for Enterprise SQS. ⚡
+Optimization and scaling strategies for BoxQ. ⚡
 
 ## 📊 Table of Contents
 
@@ -201,7 +201,7 @@ optimizedConsumer.start(async (message, context) => {
 ```javascript
 // Reuse SQS client instances
 const createOptimizedSQS = () => {
-  const sqs = new EnterpriseSQS({
+  const sqs = new BoxQ({
     region: 'us-east-1',
     credentials: { accessKeyId: '...', secretAccessKey: '...' }
   });

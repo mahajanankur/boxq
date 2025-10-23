@@ -1,5 +1,5 @@
 /**
- * @fileoverview Retry Manager implementation for Enterprise SQS
+ * @fileoverview Retry Manager implementation for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

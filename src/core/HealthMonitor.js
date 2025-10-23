@@ -1,5 +1,5 @@
 /**
- * @fileoverview Health Monitor for Enterprise SQS
+ * @fileoverview Health Monitor for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

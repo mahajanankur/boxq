@@ -146,7 +146,7 @@ https://github.com/mahajanankur/boxq
 - **"BoxQ - Where Queues Meet Excellence"**
 
 ### Secondary
-- **"Enterprise SQS Made Simple"**
+- **"BoxQ Made Simple"**
 - **"The SQS Library You've Been Waiting For"**
 - **"BoxQ - Reliability, Performance, Simplicity"**
 

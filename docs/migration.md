@@ -1,6 +1,6 @@
 # Migration Guide
 
-Migration guide for Enterprise SQS from other SQS libraries. 🔄
+Migration guide for BoxQ from other SQS libraries. 🔄
 
 ## 📋 Table of Contents
 
@@ -17,11 +17,11 @@ Migration guide for Enterprise SQS from other SQS libraries. 🔄
 
 ### Overview
 
-Enterprise SQS provides a more advanced and feature-rich alternative to sqs-consumer with better performance, reliability, and monitoring capabilities.
+BoxQ provides a more advanced and feature-rich alternative to sqs-consumer with better performance, reliability, and monitoring capabilities.
 
 ### Key Differences
 
-| Feature | sqs-consumer | Enterprise SQS |
+| Feature | sqs-consumer | BoxQ |
 |---------|--------------|----------------|
 | Circuit Breaker | ❌ | ✅ |
 | Retry Logic | Basic | Advanced |
@@ -33,14 +33,14 @@ Enterprise SQS provides a more advanced and feature-rich alternative to sqs-cons
 
 ### Migration Steps
 
-#### 1. Install Enterprise SQS
+#### 1. Install BoxQ
 
 ```bash
 # Remove sqs-consumer
 npm uninstall sqs-consumer
 
-# Install Enterprise SQS
-npm install enterprise-sqs
+# Install BoxQ
+npm install boxq
 ```
 
 #### 2. Update Imports
@@ -49,8 +49,8 @@ npm install enterprise-sqs
 // Old (sqs-consumer)
 const Consumer = require('sqs-consumer');
 
-// New (Enterprise SQS)
-const { EnterpriseSQS } = require('enterprise-sqs');
+// New (BoxQ)
+const { BoxQ } = require('boxq');
 ```
 
 #### 3. Update Configuration
@@ -64,8 +64,8 @@ const consumer = Consumer.create({
   }
 });
 
-// New (Enterprise SQS)
-const sqs = new EnterpriseSQS({
+// New (BoxQ)
+const sqs = new BoxQ({
   region: 'us-east-1',
   credentials: { accessKeyId: '...', secretAccessKey: '...' }
 });
@@ -132,11 +132,11 @@ console.log('Throughput:', metrics.system.throughput);
 
 ### Overview
 
-Enterprise SQS provides a higher-level abstraction over the AWS SDK with built-in reliability, monitoring, and performance optimizations.
+BoxQ provides a higher-level abstraction over the AWS SDK with built-in reliability, monitoring, and performance optimizations.
 
 ### Key Differences
 
-| Feature | aws-sdk | Enterprise SQS |
+| Feature | aws-sdk | BoxQ |
 |---------|---------|----------------|
 | Boilerplate Code | High | Low |
 | Error Handling | Manual | Automatic |
@@ -148,11 +148,11 @@ Enterprise SQS provides a higher-level abstraction over the AWS SDK with built-i
 
 ### Migration Steps
 
-#### 1. Install Enterprise SQS
+#### 1. Install BoxQ
 
 ```bash
 # Keep aws-sdk for other services
-npm install enterprise-sqs
+npm install boxq
 ```
 
 #### 2. Update Imports
@@ -161,8 +161,8 @@ npm install enterprise-sqs
 // Old (aws-sdk)
 const { SQSClient, SendMessageCommand, ReceiveMessageCommand } = require('@aws-sdk/client-sqs');
 
-// New (Enterprise SQS)
-const { EnterpriseSQS } = require('enterprise-sqs');
+// New (BoxQ)
+const { BoxQ } = require('boxq');
 ```
 
 #### 3. Update SQS Client
@@ -174,8 +174,8 @@ const sqsClient = new SQSClient({
   credentials: { accessKeyId: '...', secretAccessKey: '...' }
 });
 
-// New (Enterprise SQS)
-const sqs = new EnterpriseSQS({
+// New (BoxQ)
+const sqs = new BoxQ({
   region: 'us-east-1',
   credentials: { accessKeyId: '...', secretAccessKey: '...' }
 });
@@ -269,7 +269,7 @@ consumer.start(async (message, context) => {
 
 ### Overview
 
-If you have a custom SQS implementation, Enterprise SQS can provide significant improvements in reliability, performance, and maintainability.
+If you have a custom SQS implementation, BoxQ can provide significant improvements in reliability, performance, and maintainability.
 
 ### Migration Benefits
 
@@ -380,13 +380,13 @@ console.log('Throughput:', metrics.system.throughput);
 1. **Configuration Structure**
    ```javascript
    // Old configuration
-   const sqs = new EnterpriseSQS({
+   const sqs = new BoxQ({
      region: 'us-east-1',
      credentials: { accessKeyId: '...', secretAccessKey: '...' }
    });
    
    // New configuration
-   const sqs = new EnterpriseSQS({
+   const sqs = new BoxQ({
      region: 'us-east-1',
      credentials: { accessKeyId: '...', secretAccessKey: '...' },
      circuitBreaker: {
@@ -416,13 +416,13 @@ console.log('Throughput:', metrics.system.throughput);
 
 1. **Update Dependencies**
    ```bash
-   npm update enterprise-sqs
+   npm update boxq
    ```
 
 2. **Update Configuration**
    ```javascript
    // Add new configuration options
-   const sqs = new EnterpriseSQS({
+   const sqs = new BoxQ({
      // ... existing config
      circuitBreaker: {
        failureThreshold: 5,
@@ -608,16 +608,16 @@ const monitorPerformance = () => {
 
 If you encounter issues during migration:
 
-- **GitHub Issues** - [Report migration issues](https://github.com/your-org/enterprise-sqs/issues)
-- **Discord Community** - [Get help from community](https://discord.gg/enterprise-sqs)
-- **Email Support** - [Contact support team](mailto:support@enterprise-sqs.com)
-- **Documentation** - [Check documentation](https://docs.enterprise-sqs.com)
+- **GitHub Issues** - [Report migration issues](https://github.com/mahajanankur/boxq/issues)
+- **Discord Community** - [Get help from community](https://discord.gg/boxq)
+- **Email Support** - [Contact support team](mailto:support@boxq.com)
+- **Documentation** - [Check documentation](https://docs.boxq.com)
 
 ---
 
 ## 🎯 Summary
 
-Migration to Enterprise SQS provides:
+Migration to BoxQ provides:
 
 - **Better Reliability** - Circuit breaker and retry logic
 - **Improved Performance** - Optimized processing and monitoring

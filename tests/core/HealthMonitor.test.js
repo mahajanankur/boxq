@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for HealthMonitor
- * @author Enterprise SQS Team
+ * @author Ankur Mahajan
  * @version 1.0.0
  */
 
@@ -117,11 +117,17 @@ describe('HealthMonitor', () => {
 
   describe('getHealthStatus', () => {
     it('should return healthy status by default', () => {
+      // Add a small delay to ensure uptime > 0
+      const originalNow = Date.now;
+      Date.now = jest.fn(() => originalNow() + 100);
+      
       const status = healthMonitor.getHealthStatus();
       
       expect(status.status).toBe(HealthStatus.HEALTHY);
       expect(status.timestamp).toBeDefined();
       expect(status.uptime).toBeGreaterThan(0);
+      
+      Date.now = originalNow;
     });
 
     it('should return unhealthy status when circuit breaker is open', () => {

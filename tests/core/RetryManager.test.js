@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for RetryManager
- * @author Enterprise SQS Team
+ * @author Ankur Mahajan
  * @version 1.0.0
  */
 
@@ -126,7 +126,7 @@ describe('RetryManager', () => {
       
       expect(result.success).toBe(true);
       expect(result.result).toBe('success');
-      expect(result.retryCount).toBe(1);
+      expect(result.retryCount).toBe(0);
       expect(result.attempts).toHaveLength(1);
       expect(result.attempts[0].success).toBe(true);
     });

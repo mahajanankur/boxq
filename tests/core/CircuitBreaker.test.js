@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for CircuitBreaker
- * @author Enterprise SQS Team
+ * @author Ankur Mahajan
  * @version 1.0.0
  */
 
@@ -11,11 +11,16 @@ describe('CircuitBreaker', () => {
   let circuitBreaker;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     circuitBreaker = new CircuitBreaker({
       failureThreshold: 3,
       timeout: 1000,
       monitoringPeriod: 500
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('constructor', () => {
@@ -74,8 +79,12 @@ describe('CircuitBreaker', () => {
       // Wait for timeout to move to half-open
       jest.advanceTimersByTime(1001);
       
-      // Record enough successes
-      for (let i = 0; i < 3; i++) {
+      // Call canExecute to trigger transition to half-open state
+      circuitBreaker.canExecute();
+      expect(circuitBreaker.getState()).toBe(CircuitBreakerState.HALF_OPEN);
+      
+      // Record enough successes (need failureThreshold number of successes)
+      for (let i = 0; i < circuitBreaker.failureThreshold; i++) {
         circuitBreaker.recordSuccess();
       }
       

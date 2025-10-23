@@ -46,10 +46,14 @@ describe('BoxQ', () => {
 
     // Mock the SQS client
     sqs.sqsClient = mockSQSClient;
+    
+    // Mock the health monitor
+    sqs.healthMonitor.clearMetrics = jest.fn();
+    sqs.healthMonitor.clearAlerts = jest.fn();
   });
 
   describe('constructor', () => {
-    it('should create Enterprise SQS instance', () => {
+    it('should create BoxQ instance', () => {
       expect(sqs.config).toBeDefined();
       expect(sqs.sqsClient).toBeDefined();
       expect(sqs.healthMonitor).toBeDefined();

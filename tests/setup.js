@@ -1,6 +1,6 @@
 /**
- * @fileoverview Test setup for Enterprise SQS
- * @author Enterprise SQS Team
+ * @fileoverview Test setup for BoxQ
+ * @author Ankur Mahajan
  * @version 1.0.0
  */
 

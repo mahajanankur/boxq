@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Enterprise SQS will be documented in this file.
+All notable changes to BoxQ will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -147,13 +147,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. **Update Configuration**:
    ```javascript
    // Old configuration
-   const sqs = new EnterpriseSQS({
+   const sqs = new BoxQ({
      region: 'us-east-1',
      credentials: { accessKeyId: '...', secretAccessKey: '...' }
    });
    
    // New configuration
-   const sqs = new EnterpriseSQS({
+   const sqs = new BoxQ({
      region: 'us-east-1',
      credentials: { accessKeyId: '...', secretAccessKey: '...' },
      circuitBreaker: {
@@ -202,10 +202,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. **Update Imports**:
    ```javascript
    // Old import
-   const { SQSClient } = require('enterprise-sqs');
+   const { SQSClient } = require('boxq');
    
    // New import
-   const { EnterpriseSQS } = require('enterprise-sqs');
+   const { BoxQ } = require('boxq');
    ```
 
 2. **Update Client Creation**:
@@ -251,20 +251,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Support
 
 ### Community Support
-- **GitHub Issues**: [Report bugs and request features](https://github.com/your-org/enterprise-sqs/issues)
-- **Discord Community**: [Join our Discord server](https://discord.gg/enterprise-sqs)
-- **Stack Overflow**: [Ask questions with `enterprise-sqs` tag](https://stackoverflow.com/questions/tagged/enterprise-sqs)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/mahajanankur/boxq/issues)
+- **Discord Community**: [Join our Discord server](https://discord.gg/boxq)
+- **Stack Overflow**: [Ask questions with `boxq` tag](https://stackoverflow.com/questions/tagged/boxq)
 
 ### Professional Support
-- **Enterprise Support**: [Contact our enterprise team](mailto:enterprise@enterprise-sqs.com)
-- **Consulting Services**: [Get professional consulting](mailto:consulting@enterprise-sqs.com)
-- **Training**: [Schedule training sessions](mailto:training@enterprise-sqs.com)
+- **Enterprise Support**: [Contact our enterprise team](mailto:enterprise@boxq.com)
+- **Consulting Services**: [Get professional consulting](mailto:consulting@boxq.com)
+- **Training**: [Schedule training sessions](mailto:training@boxq.com)
 
 ### Documentation
-- **API Reference**: [Complete API documentation](https://docs.enterprise-sqs.com/api-reference)
-- **Examples**: [Real-world usage examples](https://docs.enterprise-sqs.com/examples)
-- **Best Practices**: [Production deployment guide](https://docs.enterprise-sqs.com/best-practices)
-- **Performance Guide**: [Optimization and scaling](https://docs.enterprise-sqs.com/performance)
+- **API Reference**: [Complete API documentation](https://docs.boxq.com/api-reference)
+- **Examples**: [Real-world usage examples](https://docs.boxq.com/examples)
+- **Best Practices**: [Production deployment guide](https://docs.boxq.com/best-practices)
+- **Performance Guide**: [Optimization and scaling](https://docs.boxq.com/performance)
 
 ---
 
@@ -304,6 +304,6 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 
 ---
 
-**Thank you for using Enterprise SQS!** 🚀
+**Thank you for using BoxQ!** 🚀
 
-For the latest updates, follow us on [GitHub](https://github.com/your-org/enterprise-sqs) and [Twitter](https://twitter.com/enterprise_sqs).
+For the latest updates, follow us on [GitHub](https://github.com/mahajanankur/boxq) and [Twitter](https://twitter.com/boxq).

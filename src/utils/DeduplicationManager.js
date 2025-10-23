@@ -1,5 +1,5 @@
 /**
- * @fileoverview Deduplication Manager for Enterprise SQS
+ * @fileoverview Deduplication Manager for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */
@@ -66,7 +66,8 @@ class DeduplicationManager {
     const contentForHash = {
       body: messageBody,
       groupId: options.messageGroupId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      random: Math.random().toString(36).substring(2)
     };
     
     return this._hashObject(contentForHash);

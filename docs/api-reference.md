@@ -1,10 +1,10 @@
 # API Reference
 
-Complete API documentation for Enterprise SQS. 📚
+Complete API documentation for BoxQ. 📚
 
 ## Table of Contents
 
-- [EnterpriseSQS](#enterprisesqs)
+- [BoxQ](#boxq)
 - [MessagePublisher](#messagepublisher)
 - [BatchPublisher](#batchpublisher)
 - [MessageConsumer](#messageconsumer)
@@ -15,14 +15,14 @@ Complete API documentation for Enterprise SQS. 📚
 
 ---
 
-## EnterpriseSQS
+## BoxQ
 
-The main class for Enterprise SQS operations.
+The main class for BoxQ operations.
 
 ### Constructor
 
 ```javascript
-new EnterpriseSQS(config)
+new BoxQ(config)
 ```
 
 **Parameters:**
@@ -35,7 +35,7 @@ new EnterpriseSQS(config)
 
 **Example:**
 ```javascript
-const sqs = new EnterpriseSQS({
+const sqs = new BoxQ({
   region: 'us-east-1',
   credentials: {
     accessKeyId: 'your-access-key',
@@ -579,7 +579,7 @@ Updates the retry configuration.
 ### ProcessingMode
 
 ```javascript
-const { ProcessingMode } = require('enterprise-sqs');
+const { ProcessingMode } = require('boxq');
 
 ProcessingMode.SEQUENTIAL // 'sequential'
 ProcessingMode.PARALLEL   // 'parallel'
@@ -588,7 +588,7 @@ ProcessingMode.PARALLEL   // 'parallel'
 ### HealthStatus
 
 ```javascript
-const { HealthStatus } = require('enterprise-sqs');
+const { HealthStatus } = require('boxq');
 
 HealthStatus.HEALTHY   // 'healthy'
 HealthStatus.UNHEALTHY // 'unhealthy'
@@ -598,7 +598,7 @@ HealthStatus.DEGRADED // 'degraded'
 ### CircuitBreakerState
 
 ```javascript
-const { CircuitBreakerState } = require('enterprise-sqs');
+const { CircuitBreakerState } = require('boxq');
 
 CircuitBreakerState.CLOSED    // 'CLOSED'
 CircuitBreakerState.OPEN      // 'OPEN'
@@ -608,7 +608,7 @@ CircuitBreakerState.HALF_OPEN // 'HALF_OPEN'
 ### LogLevel
 
 ```javascript
-const { LogLevel } = require('enterprise-sqs');
+const { LogLevel } = require('boxq');
 
 LogLevel.DEBUG // 'debug'
 LogLevel.INFO  // 'info'
@@ -620,7 +620,7 @@ LogLevel.ERROR // 'error'
 
 ## Error Handling
 
-Enterprise SQS provides comprehensive error handling:
+BoxQ provides comprehensive error handling:
 
 ### Common Errors
 

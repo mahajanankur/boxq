@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for SQSClient
- * @author Enterprise SQS Team
+ * @author Ankur Mahajan
  * @version 1.0.0
  */
 

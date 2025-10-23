@@ -1,5 +1,5 @@
 /**
- * @fileoverview Enhanced SQS Client for Enterprise SQS
+ * @fileoverview Enhanced SQS Client for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

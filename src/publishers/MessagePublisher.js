@@ -1,5 +1,5 @@
 /**
- * @fileoverview Message Publisher for Enterprise SQS
+ * @fileoverview Message Publisher for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */
@@ -96,6 +96,13 @@ class MessagePublisher {
       
     } catch (error) {
       const processingTime = Date.now() - startTime;
+      
+      // Re-throw validation errors
+      if (error.message.includes('Message body is required') || 
+          error.message.includes('Message group ID must be') ||
+          error.message.includes('Delay seconds must be')) {
+        throw error;
+      }
       
       return {
         success: false,

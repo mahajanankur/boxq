@@ -1,5 +1,5 @@
 /**
- * @fileoverview Message Consumer for Enterprise SQS
+ * @fileoverview Message Consumer for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */
@@ -248,6 +248,12 @@ class MessageConsumer {
    * Resets processing statistics
    */
   resetStats = () => this.processingEngine.resetStats();
+
+  /**
+   * Gets the queue URL
+   * @returns {string} Queue URL
+   */
+  getQueueUrl = () => this.queueUrl;
 
   /**
    * Gets the consumer configuration

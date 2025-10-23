@@ -1,5 +1,5 @@
 /**
- * @fileoverview Circuit Breaker implementation for Enterprise SQS
+ * @fileoverview Circuit Breaker implementation for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

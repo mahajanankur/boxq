@@ -1,5 +1,5 @@
 /**
- * @fileoverview Type definitions and interfaces for Enterprise SQS
+ * @fileoverview Type definitions and interfaces for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

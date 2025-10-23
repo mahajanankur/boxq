@@ -1,5 +1,5 @@
 /**
- * @fileoverview Processing Engine for Enterprise SQS
+ * @fileoverview Processing Engine for BoxQ
  * @author Ankur Mahajan
  * @version 1.0.0
  */

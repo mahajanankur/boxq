@@ -1,6 +1,6 @@
 # Best Practices for Production Deployment
 
-Production-ready guidelines for Enterprise SQS. 🏭
+Production-ready guidelines for BoxQ. 🏭
 
 ## 🎯 Table of Contents
 
@@ -49,7 +49,7 @@ module.exports = {
 
 ```javascript
 // Production queue configuration
-const sqs = new EnterpriseSQS(config);
+const sqs = new BoxQ(config);
 
 // FIFO queues for critical operations
 const criticalPublisher = sqs.createPublisher('critical-orders.fifo', {
@@ -507,13 +507,13 @@ const loadBalancedPublish = async (message) => {
 
 ```javascript
 // Primary region
-const primarySQS = new EnterpriseSQS({
+const primarySQS = new BoxQ({
   region: 'us-east-1',
   credentials: primaryCredentials
 });
 
 // Secondary region
-const secondarySQS = new EnterpriseSQS({
+const secondarySQS = new BoxQ({
   region: 'us-west-2',
   credentials: secondaryCredentials
 });

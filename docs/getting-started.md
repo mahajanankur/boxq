@@ -1,6 +1,6 @@
-# Getting Started with Enterprise SQS
+# Getting Started with BoxQ
 
-Welcome to Enterprise SQS! This guide will get you up and running in minutes. 🚀
+Welcome to BoxQ! This guide will get you up and running in minutes. 🚀
 
 ## 📋 Prerequisites
 
@@ -11,14 +11,14 @@ Welcome to Enterprise SQS! This guide will get you up and running in minutes. �
 ## 🚀 Installation
 
 ```bash
-# Install Enterprise SQS
-npm install enterprise-sqs
+# Install BoxQ
+npm install boxq
 
 # Or with yarn
-yarn add enterprise-sqs
+yarn add boxq
 
 # Or with pnpm
-pnpm add enterprise-sqs
+pnpm add boxq
 ```
 
 ## ⚡ Quick Start
@@ -26,10 +26,10 @@ pnpm add enterprise-sqs
 ### 1. Basic Setup
 
 ```javascript
-const { EnterpriseSQS } = require('enterprise-sqs');
+const { BoxQ } = require('boxq');
 
 // Create SQS instance
-const sqs = new EnterpriseSQS({
+const sqs = new BoxQ({
   region: 'us-east-1',
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -81,11 +81,11 @@ consumer.start(async (message, context) => {
 Here's a complete example that demonstrates the core features:
 
 ```javascript
-const { EnterpriseSQS } = require('enterprise-sqs');
+const { BoxQ } = require('boxq');
 
 async function main() {
   // 1. Create SQS instance
-  const sqs = new EnterpriseSQS({
+  const sqs = new BoxQ({
     region: 'us-east-1',
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -169,7 +169,7 @@ main().catch(console.error);
 ### SQS Configuration
 
 ```javascript
-const sqs = new EnterpriseSQS({
+const sqs = new BoxQ({
   region: 'us-east-1',                    // AWS region
   credentials: {                          // AWS credentials
     accessKeyId: 'your-access-key',
@@ -288,7 +288,7 @@ dataConsumer.start(async (data, context) => {
 
 ## 🚨 Error Handling
 
-Enterprise SQS provides comprehensive error handling:
+BoxQ provides comprehensive error handling:
 
 ```javascript
 try {
@@ -337,9 +337,9 @@ Now that you have the basics, explore:
 
 ## 🆘 Need Help?
 
-- **💬 Discord Community** - [Join our Discord](https://discord.gg/enterprise-sqs)
-- **🐛 Issue Tracker** - [GitHub Issues](https://github.com/your-org/enterprise-sqs/issues)
-- **📧 Email Support** - support@enterprise-sqs.com
+- **💬 Discord Community** - [Join our Discord](https://discord.gg/boxq)
+- **🐛 Issue Tracker** - [GitHub Issues](https://github.com/mahajanankur/boxq/issues)
+- **📧 Email Support** - support@boxq.com
 
 ---
 
