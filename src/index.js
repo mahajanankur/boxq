@@ -1,0 +1,287 @@
+/**
+ * @fileoverview BoxQ - Main Library Entry Point
+ * @author Ankur Mahajan
+ * @version 1.0.0
+ */
+
+const SQSClient = require('./core/SQSClient');
+const MessagePublisher = require('./publishers/MessagePublisher');
+const BatchPublisher = require('./publishers/BatchPublisher');
+const MessageConsumer = require('./consumers/MessageConsumer');
+const HealthMonitor = require('./core/HealthMonitor');
+const { ProcessingMode, HealthStatus } = require('./types');
+
+/**
+ * BoxQ - The ultimate SQS library with advanced features
+ * 
+ * Features:
+ * - Circuit breaker pattern for fault tolerance
+ * - Advanced retry logic with exponential backoff
+ * - Intelligent parallel/sequential processing
+ * - Content-based deduplication for FIFO queues
+ * - Comprehensive health monitoring
+ * - Production-ready error handling
+ * 
+ * @example
+ * ```javascript
+ * const { BoxQ } = require('boxq');
+ * 
+ * const sqs = new BoxQ({
+ *   region: 'us-east-1',
+ *   credentials: { accessKeyId: '...', secretAccessKey: '...' },
+ *   circuitBreaker: { failureThreshold: 5, timeout: 60000 },
+ *   retry: { maxRetries: 3, backoffMultiplier: 2 }
+ * });
+ * 
+ * // Create publisher
+ * const publisher = sqs.createPublisher('my-queue.fifo', {
+ *   messageGroupId: 'group-1',
+ *   enableDeduplication: true
+ * });
+ * 
+ * // Publish message
+ * await publisher.publish({ type: 'test', data: 'hello' });
+ * 
+ * // Create consumer
+ * const consumer = sqs.createConsumer('my-queue.fifo', {
+ *   processingMode: 'parallel',
+ *   batchSize: 5
+ * });
+ * 
+ * consumer.on('message', async (message, context) => {
+ *   console.log('Processing:', message);
+ * });
+ * 
+ * consumer.start();
+ * ```
+ */
+class BoxQ {
+  /**
+   * Creates a new BoxQ instance
+   * @param {Object} config - SQS configuration
+   * @param {string} config.region - AWS region
+   * @param {Object} [config.credentials] - AWS credentials
+   * @param {Object} [config.circuitBreaker] - Circuit breaker configuration
+   * @param {Object} [config.retry] - Retry configuration
+   * @param {Object} [config.logging] - Logging configuration
+   */
+  constructor(config) {
+    this.config = config;
+    this.sqsClient = new SQSClient(config);
+    this.healthMonitor = new HealthMonitor();
+    this.publishers = new Map();
+    this.consumers = new Map();
+    
+    // Register health checks
+    this._registerHealthChecks();
+  }
+
+  /**
+   * Creates a message publisher for a specific queue
+   * @param {string} queueUrl - Queue URL
+   * @param {Object} [options] - Publisher options
+   * @param {string} [options.messageGroupId] - Default message group ID
+   * @param {boolean} [options.enableDeduplication=true] - Enable content-based deduplication
+   * @param {string} [options.deduplicationStrategy='content'] - Deduplication strategy
+   * @returns {MessagePublisher} Message publisher instance
+   */
+  createPublisher = (queueUrl, options = {}) => {
+    const publisher = new MessagePublisher(this.sqsClient, queueUrl, options);
+    this.publishers.set(queueUrl, publisher);
+    return publisher;
+  };
+
+  /**
+   * Creates a batch publisher for a specific queue
+   * @param {string} queueUrl - Queue URL
+   * @param {Object} [options] - Batch publisher options
+   * @param {string} [options.messageGroupId] - Default message group ID
+   * @param {boolean} [options.enableDeduplication=true] - Enable content-based deduplication
+   * @param {number} [options.batchSize=10] - Batch size
+   * @returns {BatchPublisher} Batch publisher instance
+   */
+  createBatchPublisher = (queueUrl, options = {}) => {
+    const batchPublisher = new BatchPublisher(this.sqsClient, queueUrl, options);
+    this.publishers.set(`${queueUrl}-batch`, batchPublisher);
+    return batchPublisher;
+  };
+
+  /**
+   * Creates a message consumer for a specific queue
+   * @param {string} queueUrl - Queue URL
+   * @param {Object} [options] - Consumer options
+   * @param {string} [options.processingMode='sequential'] - Processing mode
+   * @param {number} [options.batchSize=5] - Batch size for parallel processing
+   * @param {number} [options.throttleDelayMs=0] - Throttle delay between batches
+   * @param {number} [options.maxMessages=10] - Maximum messages to receive
+   * @param {number} [options.waitTimeSeconds=20] - Long polling wait time
+   * @param {number} [options.visibilityTimeoutSeconds=30] - Message visibility timeout
+   * @param {boolean} [options.autoStart=true] - Whether to start consuming immediately
+   * @param {number} [options.pollingInterval=1000] - Polling interval in milliseconds
+   * @returns {MessageConsumer} Message consumer instance
+   */
+  createConsumer = (queueUrl, options = {}) => {
+    const consumer = new MessageConsumer(this.sqsClient, queueUrl, options);
+    consumer.setHealthMonitor(this.healthMonitor);
+    this.consumers.set(queueUrl, consumer);
+    return consumer;
+  };
+
+  /**
+   * Gets the health status of the SQS system
+   * @returns {Promise<Object>} Health status
+   */
+  getHealthStatus = async () => {
+    try {
+      // Get SQS client health
+      const sqsHealth = this.sqsClient.getCircuitBreakerStatus();
+      
+      // Get overall health monitor status
+      const monitorHealth = this.healthMonitor.getHealthStatus();
+      
+      // Perform additional health checks
+      const additionalChecks = await this.healthMonitor.performHealthChecks();
+      
+      return {
+        status: monitorHealth.status,
+        timestamp: monitorHealth.timestamp,
+        uptime: monitorHealth.uptime,
+        details: {
+          sqsClient: sqsHealth,
+          healthMonitor: monitorHealth,
+          additionalChecks: additionalChecks.overall,
+          publishers: this.publishers.size,
+          consumers: this.consumers.size
+        }
+      };
+    } catch (error) {
+      return {
+        status: HealthStatus.UNHEALTHY,
+        timestamp: new Date().toISOString(),
+        error: error.message
+      };
+    }
+  };
+
+  /**
+   * Gets comprehensive metrics for the SQS system
+   * @returns {Object} System metrics
+   */
+  getMetrics = () => {
+    const healthMetrics = this.healthMonitor.getMetrics();
+    const sqsStatus = this.sqsClient.getCircuitBreakerStatus();
+    
+    return {
+      system: {
+        uptime: healthMetrics.uptime,
+        totalMessages: healthMetrics.totalMessages,
+        successRate: healthMetrics.successRate,
+        averageProcessingTime: healthMetrics.averageProcessingTime,
+        throughput: healthMetrics.throughput
+      },
+      circuitBreaker: {
+        state: sqsStatus.state,
+        failureCount: sqsStatus.failureCount,
+        successCount: sqsStatus.successCount,
+        canExecute: sqsStatus.canExecute
+      },
+      components: {
+        publishers: this.publishers.size,
+        consumers: this.consumers.size,
+        activeConsumers: Array.from(this.consumers.values()).filter(c => c.isConsumerRunning()).length
+      },
+      alerts: healthMetrics.alerts
+    };
+  };
+
+  /**
+   * Resets all system metrics
+   */
+  resetMetrics = () => {
+    this.healthMonitor.clearMetrics();
+    this.healthMonitor.clearAlerts();
+    this.sqsClient.resetCircuitBreaker();
+  };
+
+  /**
+   * Gets the SQS client instance
+   * @returns {SQSClient} SQS client instance
+   */
+  getSQSClient = () => this.sqsClient;
+
+  /**
+   * Gets the health monitor instance
+   * @returns {HealthMonitor} Health monitor instance
+   */
+  getHealthMonitor = () => this.healthMonitor;
+
+  /**
+   * Gets all registered publishers
+   * @returns {Map} Map of publishers
+   */
+  getPublishers = () => this.publishers;
+
+  /**
+   * Gets all registered consumers
+   * @returns {Map} Map of consumers
+   */
+  getConsumers = () => this.consumers;
+
+  /**
+   * Stops all consumers
+   */
+  stopAllConsumers = () => {
+    this.consumers.forEach(consumer => consumer.stop());
+  };
+
+  /**
+   * Gets the current configuration
+   * @returns {Object} Current configuration
+   */
+  getConfig = () => ({
+    ...this.config,
+    sqsClient: this.sqsClient.getConfig(),
+    healthMonitor: this.healthMonitor.getMetrics()
+  });
+
+  /**
+   * Registers health checks
+   * @private
+   */
+  _registerHealthChecks = () => {
+    // SQS client health check
+    this.healthMonitor.registerHealthCheck('sqsClient', async () => {
+      const status = this.sqsClient.getCircuitBreakerStatus();
+      return {
+        status: status.canExecute ? 'healthy' : 'unhealthy',
+        details: status
+      };
+    });
+    
+    // Publishers health check
+    this.healthMonitor.registerHealthCheck('publishers', async () => {
+      return {
+        status: 'healthy',
+        details: { count: this.publishers.size }
+      };
+    });
+    
+    // Consumers health check
+    this.healthMonitor.registerHealthCheck('consumers', async () => {
+      const activeConsumers = Array.from(this.consumers.values()).filter(c => c.isConsumerRunning());
+      return {
+        status: 'healthy',
+        details: { 
+          total: this.consumers.size,
+          active: activeConsumers.length
+        }
+      };
+    });
+  };
+}
+
+module.exports = {
+  BoxQ,
+  ProcessingMode,
+  HealthStatus
+};

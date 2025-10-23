@@ -1,0 +1,70 @@
+{
+  "name": "boxq",
+  "version": "1.0.0",
+  "description": "BoxQ - The ultimate SQS library for Node.js. Enterprise-grade reliability with circuit breaker, retry logic, and comprehensive monitoring.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "docs": "jsdoc -c jsdoc.conf.json",
+    "prepublishOnly": "npm run build && npm run test:coverage",
+    "dev": "nodemon --exec npm run build"
+  },
+  "keywords": [
+    "sqs",
+    "aws",
+    "queue",
+    "boxq",
+    "messaging",
+    "enterprise",
+    "circuit-breaker",
+    "fifo",
+    "monitoring",
+    "production",
+    "nodejs",
+    "microservices",
+    "event-driven",
+    "reliable",
+    "scalable",
+    "retry",
+    "batch",
+    "parallel",
+    "sequential",
+    "health-check",
+    "metrics",
+    "deduplication",
+    "throttling"
+  ],
+  "author": "Ankur Mahajan",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.450.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "@types/uuid": "^9.0.7",
+    "eslint": "^8.53.0",
+    "jest": "^29.7.0",
+    "jsdoc": "^4.0.2",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mahajanankur/boxq.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mahajanankur/boxq/issues"
+  },
+  "homepage": "https://github.com/mahajanankur/boxq#readme"
+}

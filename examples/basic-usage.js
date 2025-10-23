@@ -1,0 +1,108 @@
+/**
+ * @fileoverview Basic usage example for BoxQ
+ * @author Ankur Mahajan
+ * @version 1.0.0
+ */
+
+const { BoxQ } = require('../src/index');
+
+/**
+ * Basic usage example demonstrating core features
+ */
+const basicUsageExample = async () => {
+  console.log('🚀 BoxQ - Basic Usage Example');
+  
+  // Create SQS instance
+  const sqs = new BoxQ({
+    region: 'us-east-1',
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    },
+    circuitBreaker: {
+      failureThreshold: 5,
+      timeout: 60000
+    },
+    retry: {
+      maxRetries: 3,
+      backoffMultiplier: 2
+    }
+  });
+
+  try {
+    // Create publisher
+    const publisher = sqs.createPublisher('test-queue.fifo', {
+      messageGroupId: 'example-group',
+      enableDeduplication: true
+    });
+
+    // Publish a message
+    console.log('📤 Publishing message...');
+    const publishResult = await publisher.publish({
+      type: 'user-registration',
+      userId: 12345,
+      timestamp: new Date().toISOString(),
+      data: {
+        name: 'John Doe',
+        email: 'john@example.com',
+        source: 'web-app'
+      }
+    });
+
+    if (publishResult.success) {
+      console.log('✅ Message published successfully:', publishResult.messageId);
+    } else {
+      console.error('❌ Failed to publish message:', publishResult.error);
+    }
+
+    // Create consumer
+    const consumer = sqs.createConsumer('test-queue.fifo', {
+      processingMode: 'sequential',
+      batchSize: 1,
+      maxMessages: 1
+    });
+
+    // Start consuming
+    console.log('📥 Starting consumer...');
+    consumer.start(async (message, context) => {
+      console.log('📨 Processing message:', message);
+      console.log('🆔 Message ID:', context.messageId);
+      console.log('👥 Group ID:', context.messageGroupId);
+      
+      // Simulate processing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('✅ Message processed successfully');
+    });
+
+    // Wait for processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Get health status
+    console.log('🏥 Getting health status...');
+    const health = await sqs.getHealthStatus();
+    console.log('Health Status:', health.status);
+    console.log('Uptime:', health.uptime, 'ms');
+
+    // Get metrics
+    console.log('📊 Getting metrics...');
+    const metrics = sqs.getMetrics();
+    console.log('Messages processed:', metrics.system.totalMessages);
+    console.log('Success rate:', metrics.system.successRate + '%');
+    console.log('Circuit breaker state:', metrics.circuitBreaker.state);
+
+    // Stop consumer
+    consumer.stop();
+    console.log('🛑 Consumer stopped');
+
+  } catch (error) {
+    console.error('❌ Error in basic usage example:', error.message);
+  }
+};
+
+// Run example if called directly
+if (require.main === module) {
+  basicUsageExample().catch(console.error);
+}
+
+module.exports = basicUsageExample;
