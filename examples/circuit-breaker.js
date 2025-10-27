@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 
+require('dotenv').config();
 const { BoxQ } = require('../src/index');
 
 /**

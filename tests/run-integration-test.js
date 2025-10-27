@@ -4,7 +4,7 @@
  */
 
 require('dotenv').config();
-const { BoxQ } = require('./src/index');
+const { BoxQ } = require('../src/index');
 
 async function runIntegrationTest() {
   console.log('🧪 Running BoxQ Integration Test\n');

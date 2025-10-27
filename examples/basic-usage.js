@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 
+require('dotenv').config();
 const { BoxQ } = require('../src/index');
 
 /**
@@ -12,9 +13,16 @@ const { BoxQ } = require('../src/index');
 const basicUsageExample = async () => {
   console.log('🚀 BoxQ - Basic Usage Example');
   
+  // Check for required environment variables
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.SQS_QUEUE_URL) {
+    console.error('❌ Missing required environment variables:');
+    console.error('   Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and SQS_QUEUE_URL in your .env file');
+    return;
+  }
+
   // Create SQS instance
   const sqs = new BoxQ({
-    region: 'us-east-1',
+    region: process.env.AWS_REGION || 'ap-south-1',
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -31,8 +39,8 @@ const basicUsageExample = async () => {
 
   try {
     // Create publisher
-    const publisher = sqs.createPublisher('test-queue.fifo', {
-      messageGroupId: 'example-group',
+    const publisher = sqs.createPublisher(process.env.SQS_QUEUE_URL, {
+      messageGroupId: process.env.SQS_MESSAGE_GROUP_ID || 'example-group',
       enableDeduplication: true
     });
 
@@ -56,7 +64,7 @@ const basicUsageExample = async () => {
     }
 
     // Create consumer
-    const consumer = sqs.createConsumer('test-queue.fifo', {
+    const consumer = sqs.createConsumer(process.env.SQS_QUEUE_URL, {
       processingMode: 'sequential',
       batchSize: 1,
       maxMessages: 1

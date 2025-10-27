@@ -11,6 +11,7 @@
 
 - **🔄 Circuit Breaker Pattern** - Automatic failure detection and recovery
 - **⚡ Intelligent Processing** - Parallel and sequential processing modes
+- **⏳ Long Polling Support** - Efficient message consumption with minimal API calls
 - **🔒 Content-Based Deduplication** - Advanced FIFO queue deduplication
 - **📊 Comprehensive Monitoring** - Health checks, metrics, and alerting
 - **🛡️ Production-Ready** - Error handling, retry logic, and graceful shutdown
@@ -127,6 +128,76 @@ const consumer = sqs.createConsumer('queue.fifo', {
   visibilityTimeoutSeconds: 30,         // Message visibility timeout
   autoStart: true,                      // Start consuming immediately
   pollingInterval: 1000                 // Polling interval
+});
+```
+
+### ⏳ Long Polling
+
+BoxQ supports efficient long polling to reduce API calls and costs while maintaining real-time message delivery.
+
+#### Benefits of Long Polling
+
+- **💰 Cost Reduction**: Up to 90% fewer SQS API calls
+- **⚡ Better Performance**: Reduced network overhead
+- **🎯 Real-time Delivery**: Messages delivered immediately when available
+- **📈 Auto-scaling**: Efficiently handles varying message volumes
+
+#### Long Polling Configuration
+
+```javascript
+const consumer = sqs.createConsumer('queue.fifo', {
+  waitTimeSeconds: 20,        // Wait up to 20 seconds for messages
+  maxMessages: 10,            // Receive up to 10 messages per poll
+  batchSize: 5,               // Process up to 5 messages at once
+  pollingInterval: 1000       // Poll every second (with long polling)
+});
+```
+
+#### Long Polling vs Short Polling
+
+```javascript
+// Short Polling (Frequent API calls)
+const shortPollConsumer = sqs.createConsumer('queue.fifo', {
+  waitTimeSeconds: 0,         // No waiting - immediate return
+  pollingInterval: 1000       // Poll every second
+});
+
+// Long Polling (Efficient API usage)
+const longPollConsumer = sqs.createConsumer('queue.fifo', {
+  waitTimeSeconds: 20,        // Wait up to 20 seconds for messages
+  pollingInterval: 1000       // Poll every second (but with long polling)
+});
+```
+
+#### Best Practices
+
+- **Use `waitTimeSeconds: 20`** for maximum efficiency
+- **Set appropriate `batchSize`** based on your processing capacity
+- **Monitor API call counts** in production
+- **Adjust `pollingInterval`** based on message frequency
+
+#### Long Polling Example
+
+```javascript
+const consumer = sqs.createConsumer('queue.fifo', {
+  messageGroupId: 'my-group',
+  processingMode: 'sequential',
+  batchSize: 3,                    // Process up to 3 messages at once
+  maxMessages: 10,                 // Receive up to 10 messages per poll
+  waitTimeSeconds: 20,             // Long polling: wait up to 20 seconds
+  visibilityTimeoutSeconds: 30,    // Message visibility timeout
+  pollingInterval: 1000            // Poll every second (with long polling)
+});
+
+consumer.start(async (message, context) => {
+  console.log(`📨 Received: ${context.messageId}`);
+  console.log(`   Type: ${message.type}`);
+  console.log(`   Data: ${message.data}`);
+  
+  // Process message
+  await processMessage(message);
+  
+  return { success: true };
 });
 ```
 
@@ -319,7 +390,7 @@ sqs.resetMetrics();
 ## 🧪 Testing
 
 ```bash
-# Run tests
+# Run unit tests
 npm test
 
 # Run tests with coverage
@@ -327,6 +398,24 @@ npm run test:coverage
 
 # Run tests in watch mode
 npm run test:watch
+
+# Run integration tests
+npm run test:integration
+
+# Run all tests (unit + integration)
+npm run test:all
+
+# Run end-to-end test
+npm run test:e2e
+
+# Run long polling test
+npm run test:long-polling
+
+# Run microservices architecture test
+npm run test:microservices
+
+# Run Express microservice example
+npm run example:microservice
 ```
 
 ## 📊 Performance

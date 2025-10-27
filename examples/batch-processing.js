@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 
+require('dotenv').config();
 const { BoxQ } = require('../src/index');
 
 /**
@@ -12,9 +13,16 @@ const { BoxQ } = require('../src/index');
 const batchProcessingExample = async () => {
   console.log('⚡ BoxQ - Batch Processing Example');
   
+  // Check for required environment variables
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.SQS_QUEUE_URL) {
+    console.error('❌ Missing required environment variables:');
+    console.error('   Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and SQS_QUEUE_URL in your .env file');
+    return;
+  }
+
   // Create SQS instance
   const sqs = new BoxQ({
-    region: 'us-east-1',
+    region: process.env.AWS_REGION || 'ap-south-1',
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -23,8 +31,8 @@ const batchProcessingExample = async () => {
 
   try {
     // Create batch publisher
-    const batchPublisher = sqs.createBatchPublisher('events.fifo', {
-      messageGroupId: 'event-processing',
+    const batchPublisher = sqs.createBatchPublisher(process.env.SQS_QUEUE_URL, {
+      messageGroupId: process.env.SQS_MESSAGE_GROUP_ID || 'event-processing',
       enableDeduplication: true,
       batchSize: 10
     });
@@ -76,7 +84,7 @@ const batchProcessingExample = async () => {
     }
 
     // Create parallel consumer
-    const consumer = sqs.createConsumer('events.fifo', {
+    const consumer = sqs.createConsumer(process.env.SQS_QUEUE_URL, {
       processingMode: 'parallel',
       batchSize: 5,
       throttleDelayMs: 10,
