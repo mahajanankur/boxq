@@ -13,6 +13,7 @@
     "test:long-polling": "node tests/test-long-polling.js",
     "test:microservices": "node tests/test-microservices-simple.js",
     "test:integration-runner": "node tests/run-integration-test.js",
+    "test:workflows": "node scripts/test-workflows.js",
     "example:microservice": "node examples/express-microservice.js",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
@@ -52,8 +53,10 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "docdash": "^2.0.2",
     "dotenv": "^17.2.3",
     "eslint": "^8.53.0",
+    "express": "^4.18.2",
     "jest": "^29.7.0",
     "jsdoc": "^4.0.2",
     "nodemon": "^3.0.1"

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>publishers/MessagePublisher.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BatchPublisher.html">BatchPublisher</a></li><li><a href="BoxQ.html">BoxQ</a></li><li><a href="CircuitBreaker.html">CircuitBreaker</a></li><li><a href="DeduplicationManager.html">DeduplicationManager</a></li><li><a href="HealthMonitor.html">HealthMonitor</a></li><li><a href="MessageConsumer.html">MessageConsumer</a></li><li><a href="MessagePublisher.html">MessagePublisher</a></li><li><a href="ProcessingEngine.html">ProcessingEngine</a></li><li><a href="RetryManager.html">RetryManager</a></li><li><a href="SQSClient.html">SQSClient</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">publishers/MessagePublisher.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Message Publisher for BoxQ
+ * @author Ankur Mahajan
+ * @version 1.0.0
+ */
+
+const { SendMessageCommand } = require('@aws-sdk/client-sqs');
+const { v4: uuidv4 } = require('uuid');
+const DeduplicationManager = require('../utils/DeduplicationManager');
+
+/**
+ * Message Publisher class for publishing messages to SQS queues
+ * Provides FIFO support, deduplication, and advanced publishing features
+ */
+class MessagePublisher {
+  /**
+   * Creates a new MessagePublisher instance
+   * @param {Object} sqsClient - SQS client instance
+   * @param {string} queueUrl - Queue URL
+   * @param {Object} options - Publisher options
+   * @param {string} [options.messageGroupId] - Default message group ID
+   * @param {boolean} [options.enableDeduplication=true] - Enable content-based deduplication
+   * @param {string} [options.deduplicationStrategy='content'] - Deduplication strategy
+   */
+  constructor(sqsClient, queueUrl, options = {}) {
+    this.sqsClient = sqsClient;
+    this.queueUrl = queueUrl;
+    this.messageGroupId = options.messageGroupId;
+    this.enableDeduplication = options.enableDeduplication !== false;
+    this.deduplicationManager = new DeduplicationManager({
+      strategy: options.deduplicationStrategy || 'content'
+    });
+  }
+
+  /**
+   * Publishes a single message to the queue
+   * @param {Object} messageBody - Message body
+   * @param {Object} options - Message options
+   * @param {string} [options.messageGroupId] - Message group ID for FIFO queues
+   * @param {string} [options.messageDeduplicationId] - Custom deduplication ID
+   * @param {number} [options.delaySeconds] - Delay in seconds before message becomes available
+   * @param {Object} [options.messageAttributes] - Additional message attributes
+   * @returns {Promise&lt;Object>} Publishing result
+   */
+  publish = async (messageBody, options = {}) => {
+    const startTime = Date.now();
+    
+    try {
+      // Validate inputs
+      this._validateMessageBody(messageBody);
+      this._validateOptions(options);
+      
+      // Generate deduplication ID if needed
+      const messageDeduplicationId = this._generateDeduplicationId(messageBody, options);
+      
+      // Check for duplicates if deduplication is enabled
+      if (this.enableDeduplication &amp;&amp; this.deduplicationManager.isDuplicate(messageDeduplicationId)) {
+        throw new Error('Duplicate message detected');
+      }
+      
+      // Prepare message attributes
+      const messageAttributes = this._buildMessageAttributes(options.messageAttributes);
+      
+      // Build command parameters
+      const commandParams = {
+        QueueUrl: this.queueUrl,
+        MessageBody: JSON.stringify(messageBody),
+        MessageAttributes: messageAttributes
+      };
+      
+      // Add FIFO-specific parameters
+      if (this._isFIFOQueue()) {
+        commandParams.MessageGroupId = options.messageGroupId || this.messageGroupId;
+        commandParams.MessageDeduplicationId = messageDeduplicationId;
+      }
+      
+      // Add delay if specified
+      if (options.delaySeconds &amp;&amp; options.delaySeconds > 0) {
+        commandParams.DelaySeconds = Math.min(options.delaySeconds, 900); // Max 15 minutes
+      }
+      
+      // Send message
+      const command = new SendMessageCommand(commandParams);
+      const result = await this.sqsClient.executeCommand(command);
+      
+      const processingTime = Date.now() - startTime;
+      
+      return {
+        success: true,
+        messageId: result.MessageId,
+        md5OfBody: result.MD5OfBody,
+        messageDeduplicationId,
+        messageGroupId: commandParams.MessageGroupId,
+        processingTime
+      };
+      
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      
+      // Re-throw validation errors
+      if (error.message.includes('Message body is required') || 
+          error.message.includes('Message group ID must be') ||
+          error.message.includes('Delay seconds must be')) {
+        throw error;
+      }
+      
+      return {
+        success: false,
+        error: error.message,
+        processingTime
+      };
+    }
+  };
+
+  /**
+   * Publishes multiple messages in batch
+   * @param {Array} messages - Array of message objects
+   * @param {Object} [options] - Batch options
+   * @param {number} [options.batchSize=10] - Batch size for processing
+   * @returns {Promise&lt;Array>} Array of publishing results
+   */
+  publishBatch = async (messages, options = {}) => {
+    const batchSize = options.batchSize || 10;
+    const results = [];
+    
+    // Process messages in batches
+    for (let i = 0; i &lt; messages.length; i += batchSize) {
+      const batch = messages.slice(i, i + batchSize);
+      const batchPromises = batch.map(message => 
+        this.publish(message.body, message.options || {})
+      );
+      
+      const batchResults = await Promise.allSettled(batchPromises);
+      
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          results.push({
+            success: false,
+            error: result.reason?.message || 'Unknown error',
+            processingTime: 0
+          });
+        }
+      });
+    }
+    
+    return results;
+  };
+
+  /**
+   * Generates a deduplication ID for a message
+   * @private
+   * @param {Object} messageBody - Message body
+   * @param {Object} options - Message options
+   * @returns {string} Deduplication ID
+   */
+  _generateDeduplicationId = (messageBody, options) => {
+    if (options.messageDeduplicationId) {
+      return options.messageDeduplicationId;
+    }
+    
+    if (this._isFIFOQueue()) {
+      return this.deduplicationManager.generateDeduplicationId(messageBody, options);
+    }
+    
+    return uuidv4();
+  };
+
+  /**
+   * Checks if the queue is a FIFO queue
+   * @private
+   * @returns {boolean} True if FIFO queue
+   */
+  _isFIFOQueue = () => this.queueUrl.endsWith('.fifo');
+
+  /**
+   * Validates message body
+   * @private
+   * @param {Object} messageBody - Message body to validate
+   * @throws {Error} If validation fails
+   */
+  _validateMessageBody = (messageBody) => {
+    if (!messageBody || typeof messageBody !== 'object') {
+      throw new Error('Message body is required and must be an object');
+    }
+  };
+
+  /**
+   * Validates message options
+   * @private
+   * @param {Object} options - Options to validate
+   * @throws {Error} If validation fails
+   */
+  _validateOptions = (options) => {
+    if (options.messageGroupId &amp;&amp; typeof options.messageGroupId !== 'string') {
+      throw new Error('Message group ID must be a string');
+    }
+    
+    if (options.delaySeconds &amp;&amp; (typeof options.delaySeconds !== 'number' || options.delaySeconds &lt; 0)) {
+      throw new Error('Delay seconds must be a non-negative number');
+    }
+  };
+
+  /**
+   * Builds message attributes for SQS message
+   * @private
+   * @param {Object} attributes - Raw message attributes
+   * @returns {Object} Formatted message attributes
+   */
+  _buildMessageAttributes = (attributes = {}) => {
+    const messageAttributes = {};
+    
+    Object.entries(attributes).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        messageAttributes[key] = {
+          DataType: 'String',
+          StringValue: value
+        };
+      } else if (typeof value === 'number') {
+        messageAttributes[key] = {
+          DataType: 'Number',
+          StringValue: value.toString()
+        };
+      } else if (typeof value === 'boolean') {
+        messageAttributes[key] = {
+          DataType: 'String',
+          StringValue: value.toString()
+        };
+      }
+    });
+    
+    return messageAttributes;
+  };
+
+  /**
+   * Gets the deduplication manager
+   * @returns {DeduplicationManager} Deduplication manager instance
+   */
+  getDeduplicationManager = () => this.deduplicationManager;
+
+  /**
+   * Gets the queue URL
+   * @returns {string} Queue URL
+   */
+  getQueueUrl = () => this.queueUrl;
+
+  /**
+   * Gets the publisher configuration
+   * @returns {Object} Publisher configuration
+   */
+  getConfig = () => ({
+    queueUrl: this.queueUrl,
+    messageGroupId: this.messageGroupId,
+    enableDeduplication: this.enableDeduplication,
+    deduplicationStrategy: this.deduplicationManager.getConfig().strategy
+  });
+}
+
+module.exports = MessagePublisher;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Oct 27 2025 16:21:49 GMT+0530 (India Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+name: Performance
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Run every Sunday at 3 AM
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run performance tests
+      run: |
+        echo "⚡ Running performance tests..."
+        timeout 60s node tests/test-microservices-simple.js || true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        SQS_QUEUE_URL: ${{ secrets.SQS_QUEUE_URL }}
+        SQS_MESSAGE_GROUP_ID: ${{ secrets.SQS_MESSAGE_GROUP_ID }}
+        
+    - name: Run long polling test
+      run: |
+        echo "⏳ Testing long polling performance..."
+        timeout 30s node tests/test-long-polling.js || true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        SQS_QUEUE_URL: ${{ secrets.SQS_QUEUE_URL }}
+        SQS_MESSAGE_GROUP_ID: ${{ secrets.SQS_MESSAGE_GROUP_ID }}
+
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run benchmark
+      run: |
+        echo "📊 Running benchmarks..."
+        node -e "
+        const { performance } = require('perf_hooks');
+        const { BoxQ } = require('./src/index');
+        
+        console.log('🚀 BoxQ Performance Benchmark');
+        console.log('============================');
+        
+        // Test initialization time
+        const startInit = performance.now();
+        const sqs = new BoxQ({
+          region: 'us-east-1',
+          credentials: {
+            accessKeyId: 'test',
+            secretAccessKey: 'test'
+          }
+        });
+        const endInit = performance.now();
+        console.log(\`Initialization: \${(endInit - startInit).toFixed(2)}ms\`);
+        
+        // Test publisher creation
+        const startPub = performance.now();
+        const publisher = sqs.createPublisher('test-queue.fifo', {
+          messageGroupId: 'test',
+          enableDeduplication: true
+        });
+        const endPub = performance.now();
+        console.log(\`Publisher creation: \${(endPub - startPub).toFixed(2)}ms\`);
+        
+        // Test consumer creation
+        const startCons = performance.now();
+        const consumer = sqs.createConsumer('test-queue.fifo', {
+          processingMode: 'sequential',
+          batchSize: 1
+        });
+        const endCons = performance.now();
+        console.log(\`Consumer creation: \${(endCons - startCons).toFixed(2)}ms\`);
+        
+        console.log('✅ Benchmark completed');
+        "

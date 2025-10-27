@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>core/SQSClient.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BatchPublisher.html">BatchPublisher</a></li><li><a href="BoxQ.html">BoxQ</a></li><li><a href="CircuitBreaker.html">CircuitBreaker</a></li><li><a href="DeduplicationManager.html">DeduplicationManager</a></li><li><a href="HealthMonitor.html">HealthMonitor</a></li><li><a href="MessageConsumer.html">MessageConsumer</a></li><li><a href="MessagePublisher.html">MessagePublisher</a></li><li><a href="ProcessingEngine.html">ProcessingEngine</a></li><li><a href="RetryManager.html">RetryManager</a></li><li><a href="SQSClient.html">SQSClient</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">core/SQSClient.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Enhanced SQS Client for BoxQ
+ * @author Ankur Mahajan
+ * @version 1.0.0
+ */
+
+const { SQSClient: AWSSQSClient } = require('@aws-sdk/client-sqs');
+const CircuitBreaker = require('./CircuitBreaker');
+const RetryManager = require('./RetryManager');
+
+/**
+ * Enhanced SQS Client with circuit breaker and retry logic
+ * Provides a production-ready wrapper around AWS SQS client
+ */
+class SQSClient {
+  /**
+   * Creates a new SQSClient instance
+   * @param {Object} config - SQS configuration
+   * @param {string} config.region - AWS region
+   * @param {Object} [config.credentials] - AWS credentials
+   * @param {Object} [config.circuitBreaker] - Circuit breaker configuration
+   * @param {Object} [config.retry] - Retry configuration
+   */
+  constructor(config) {
+    this.region = config.region;
+    this.credentials = config.credentials;
+    
+    // Initialize circuit breaker
+    this.circuitBreaker = new CircuitBreaker(config.circuitBreaker || {});
+    
+    // Initialize retry manager
+    this.retryManager = new RetryManager(config.retry || {});
+    
+    // Initialize AWS SQS client
+    this.awsClient = new AWSSQSClient({
+      region: this.region,
+      credentials: this.credentials,
+      maxAttempts: 3,
+      retryMode: 'adaptive'
+    });
+  }
+
+  /**
+   * Executes an SQS command with circuit breaker and retry logic
+   * @param {Object} command - AWS SQS command
+   * @param {Object} [options] - Execution options
+   * @returns {Promise&lt;any>} Command result
+   */
+  executeCommand = async (command, options = {}) => {
+    if (!this.circuitBreaker.canExecute()) {
+      throw new Error('Circuit breaker is open - operation not allowed');
+    }
+
+    const executeFn = async () => {
+      try {
+        const result = await this.awsClient.send(command);
+        this.circuitBreaker.recordSuccess();
+        return result;
+      } catch (error) {
+        this.circuitBreaker.recordFailure();
+        throw error;
+      }
+    };
+
+    return await this.retryManager.executeWithRetry(executeFn, {
+      shouldRetry: (error) => {
+        // Retry on network errors, throttling, and temporary failures
+        return error.name === 'ThrottlingException' ||
+               error.name === 'ServiceUnavailableException' ||
+               error.name === 'InternalServerError' ||
+               error.name === 'NetworkingError' ||
+               error.name === 'TimeoutError';
+      },
+      onRetry: (error, attempt, delay) => {
+        console.warn(`SQS command retry ${attempt}: ${error.message}, retrying in ${delay}ms`);
+      },
+      onFailure: (error, totalAttempts) => {
+        console.error(`SQS command failed after ${totalAttempts} attempts: ${error.message}`);
+      }
+    });
+  };
+
+  /**
+   * Gets the circuit breaker status
+   * @returns {Object} Circuit breaker status
+   */
+  getCircuitBreakerStatus = () => this.circuitBreaker.getStatus();
+
+  /**
+   * Resets the circuit breaker
+   */
+  resetCircuitBreaker = () => this.circuitBreaker.reset();
+
+  /**
+   * Gets the retry configuration
+   * @returns {Object} Retry configuration
+   */
+  getRetryConfig = () => this.retryManager.getConfig();
+
+  /**
+   * Updates the retry configuration
+   * @param {Object} config - New retry configuration
+   */
+  updateRetryConfig = (config) => this.retryManager.updateConfig(config);
+
+  /**
+   * Gets the AWS SQS client (for direct access if needed)
+   * @returns {AWSSQSClient} AWS SQS client
+   */
+  getAWSClient = () => this.awsClient;
+
+  /**
+   * Gets the current configuration
+   * @returns {Object} Current configuration
+   */
+  getConfig = () => ({
+    region: this.region,
+    credentials: this.credentials,
+    circuitBreaker: this.circuitBreaker.getStatus(),
+    retry: this.retryManager.getConfig()
+  });
+}
+
+module.exports = SQSClient;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Oct 27 2025 16:21:49 GMT+0530 (India Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

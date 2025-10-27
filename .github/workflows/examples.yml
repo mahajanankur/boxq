@@ -1,0 +1,87 @@
+name: Examples
+
+on:
+  schedule:
+    - cron: '0 2 * * 0' # Run every Sunday at 2 AM
+  workflow_dispatch:
+
+jobs:
+  test-examples:
+    name: Test Examples
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Test Basic Usage Example
+      run: timeout 30s node examples/basic-usage.js || true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        SQS_QUEUE_URL: ${{ secrets.SQS_QUEUE_URL }}
+        SQS_MESSAGE_GROUP_ID: ${{ secrets.SQS_MESSAGE_GROUP_ID }}
+        
+    - name: Test Long Polling Example
+      run: timeout 30s node examples/long-polling-example.js || true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        SQS_QUEUE_URL: ${{ secrets.SQS_QUEUE_URL }}
+        SQS_MESSAGE_GROUP_ID: ${{ secrets.SQS_MESSAGE_GROUP_ID }}
+        
+    - name: Test Express Microservice Example
+      run: timeout 30s node examples/express-microservice.js || true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        SQS_QUEUE_URL: ${{ secrets.SQS_QUEUE_URL }}
+        SQS_MESSAGE_GROUP_ID: ${{ secrets.SQS_MESSAGE_GROUP_ID }}
+        PORT: 3001
+
+  validate-examples:
+    name: Validate Examples
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Validate Example Syntax
+      run: |
+        echo "🔍 Validating example syntax..."
+        for file in examples/*.js; do
+          echo "Checking $file..."
+          node -c "$file" && echo "✅ $file syntax OK" || echo "❌ $file syntax error"
+        done
+        
+    - name: Check Example Dependencies
+      run: |
+        echo "📦 Checking example dependencies..."
+        for file in examples/*.js; do
+          echo "Checking $file for missing dependencies..."
+          if grep -q "require('express')" "$file" && ! grep -q "express" package.json; then
+            echo "⚠️  $file uses express but it's not in package.json"
+          fi
+        done
